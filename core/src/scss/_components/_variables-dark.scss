@@ -1,0 +1,39 @@
+// Dark Layout Variables
+
+// ! _variable-dark.scss file overrides _variable.scss file.
+
+// Navbar (custom navbar)
+// *******************************************************************************
+$navbar-search-shadow: 0px 4px 8px -4px rgba($shadow-bg, 0.68) !default;
+
+// Menu
+// *******************************************************************************
+$menu-horizontal-box-shadow: $navbar-search-shadow !default;
+$menu-sub-box-shadow: $box-shadow-lg !default;
+
+// Footer
+// *******************************************************************************
+$footer-fixed-box-shadow: 0px -4px 8px -4px rgba($shadow-bg, 0.42) !default;
+
+// Custom Options
+// *******************************************************************************
+$custom-option-label-bg: rgba-to-hex(rgba($base, 0.16), $rgba-to-hex-bg) !default;
+
+// switch
+// *******************************************************************************
+$switch-off-color: rgba-to-hex($gray-600, $rgba-to-hex-bg) !default;
+$switch-off-bg: rgba-to-hex($gray-100, $rgba-to-hex-bg) !default;
+$switch-off-border: rgba-to-hex($gray-100, $rgba-to-hex-bg) !default;
+
+// Avatars
+// *******************************************************************************
+$avatar-bg: #3f3b59 !default; // (C)
+
+// Timeline
+// *******************************************************************************
+$timeline-border-color: rgba-to-hex(rgba($base, 0.3), $rgba-to-hex-bg) !default;
+$timeline-event-time-color: $body-color !default;
+
+// Text Divider
+// *******************************************************************************
+$divider-color: $border-color !default;

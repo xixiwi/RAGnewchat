@@ -1,0 +1,10 @@
+{
+  "menu": [
+    {
+      "url": "index",
+      "icon": "menu-icon tf-icons ri-home-smile-line",
+      "name": "Chat",
+      "slug": "index"
+    }
+  ]
+}
