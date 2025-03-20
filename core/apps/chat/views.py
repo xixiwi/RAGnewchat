@@ -13,7 +13,8 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langchain_community.document_loaders import PDFPlumberLoader
-from langchain_community.embeddings import OllamaEmbeddings
+# from langchain_community.embeddings import OllamaEmbeddings
+from langchain_ollama import OllamaEmbeddings
 from langchain_community.vectorstores import Chroma
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import re
@@ -21,6 +22,9 @@ import re
 from langchain.retrievers.multi_query import MultiQueryRetriever
 from langchain import hub
 
+
+# from re_by_cc import compression_retriever,pretty_print_docs
+from langchain_community.vectorstores import FAISS
 
 def remove_think(text):
     # 使用正则表达式匹配<think>...</think>标签及其内容
@@ -40,10 +44,16 @@ from langchain.schema.runnable import RunnablePassthrough
 from langchain.prompts import ChatPromptTemplate
 from langchain.schema import StrOutputParser
 
+# 一种强大的检索器
+from langchain.retrievers import ContextualCompressionRetriever
+from langchain.retrievers.document_compressors import LLMChainFilter
+
+
+
 # 配置信息
 PDF_FILES_PATH = 'KB3/pdfs/*.pdf'
 EMBEDDING_MODEL = "nomic-embed-text"
-QA_MODEL = "deepseek-r1:8b"
+QA_MODEL = "deepseek-r1:14b"
 CHUNK_SIZE = 1000
 CHUNK_OVERLAP = 100
 
@@ -74,7 +84,11 @@ def load_and_split_pdf(files_path):
 def initialize_vector_store():
     try:
         local_embeddings = OllamaEmbeddings(model=EMBEDDING_MODEL)
-        vectorstore = Chroma(persist_directory='/home/luyu/agent2_sales_qa/core/apps/chat/chroma_db', embedding_function=local_embeddings)
+        vectorstore = FAISS.load_local(
+            folder_path='/home/luyu/agent2_sales_qa/core/apps/chat/faiss_db',
+            embeddings=local_embeddings,normalize_L2=True,
+            allow_dangerous_deserialization=True
+        )
         print("成功加载持久化向量数据库")
         return vectorstore
     except Exception as e:
@@ -90,7 +104,7 @@ def format_docs(docs):
 # prompt = hub.pull("rlm/rag-prompt")
 
 # 4. 构建 QA 链
-def build_qa_chain(vectorstore, model_name):
+def build_qa_chain(vectorstore, model_name,query):
     print("step 4")
     if vectorstore is None:
         print("向量存储未正确初始化，无法构建问答链。")
@@ -98,16 +112,16 @@ def build_qa_chain(vectorstore, model_name):
     try:
         # model = ChatOllama(model=model_name)
         model = ChatOllama(model=model_name,
-                            base_url="http://10.168.6.34:11434",temperature = 0.2,mirostat_tau=2.0,top_k=10,top_p=0.5
+                            base_url="http://10.168.6.88:11434",temperature = 0.2,mirostat_tau=2.0,top_k=10,top_p=0.5
                             )
         RAG_TEMPLATE = """
         从现在起，如果别人问你是谁，你就回答你是一个由允思拓公司部署的本地大语言模型，模型基于DeepSeek-8b开源模型开发。
     你可以帮助回答三类问题，分别是科学问题（特别是关于健康、疾病、传染病相关知识以及医院的服务信息）、技术问题（关于生物信息相关的技术内容）、本公司的业务问题。对于上下文搜索不到的内容，你可以直接回答“不好意思，我目前不知道如何回答您的问题，您可以继续提问关于允思拓公司的信息和业务介绍。”。
-        当回答关于价格的问题，第一个段落回答对应业务的价格，第二个段落介绍该业务，第三个段落提出允思拓公司在该业务上的优势，最后附上公司联系方式。
+        当回答关于价格的问题，第一个段落回答对应业务的价格(包含不同样本量)，第二个段落介绍该业务，第三个段落提出允思拓公司在该业务上的优势，最后附上公司联系方式。
         <context>
         {context}
         </context>
-    在理解你自己是谁的情况下，按照用户的要求，以简洁的方式回答下面的问题：
+    在理解你自己是谁的情况下，按照用户的要求，以简洁严谨的方式回答下面的问题：
         {question}"""
         
         # 提示词工程
@@ -120,29 +134,63 @@ def build_qa_chain(vectorstore, model_name):
         # Retrieve and generate using the relevant snippets of the blog.
         # retriever = vectorstore.as_retriever()
         
+        
+        retriever = vectorstore.as_retriever(search_type="similarity_score_threshold", search_kwargs={"score_threshold": .1})
+        if retriever is None:
+            print("Retriever 对象为 None，无法调用 invoke 方法")
+        
+        test1=vectorstore.similarity_search_with_relevance_scores(RunnablePassthrough())
+        # print("------检索结果----------",test1,"\n")
         # 把query转换为多种同义问句再提问，回答会更准确
-        retriever_from_llm = MultiQueryRetriever.from_llm(
-            # retriever=vectorstore.as_retriever(search_type="similarity_score_threshold",search_kwargs={"score_threshold": .5}), llm=model
-            retriever=vectorstore.as_retriever(search_type="similarity",search_kwargs={"k": 10}), llm=model
+        # retriever_from_llm = MultiQueryRetriever.from_llm(
+        #     # retriever=vectorstore.as_retriever(search_type="similarity_score_threshold",search_kwargs={"score_threshold": .5}), llm=model
+        #     retriever=vectorstore.as_retriever(search_type="similarity",search_kwargs={"k": 10}), llm=model
             
-            )
+        #     )
             
 
         #prompt = hub.pull("rlm/rag-prompt")
+                
+        # #后续要使用的重排序
         
-        #
+        # Helper function for printing docs
+        def pretty_print_docs(docs):
+            print(
+                f"\n{'-' * 100}\n".join(
+                    [f"Document {i+1}:\n\n" + d.page_content for i, d in enumerate(docs)]
+                )
+            )
+        # 另一种更简单但更强大的过滤器
+
+        _filter = LLMChainFilter.from_llm(model)
+        compression_retriever = ContextualCompressionRetriever(
+            base_compressor=_filter, base_retriever=retriever
+        )
         
-        #重排序
         
-        results = retriever_from_llm.get_relevant_documents(RunnablePassthrough())
+        query_new="你是一个由允思拓公司部署的本地大语言模型,结合允思拓公司的信息回答以下问题："+query
+        print("问题是：",query_new)
+        compressed_docs = compression_retriever.invoke(query_new)
+        pretty_print_docs(compressed_docs)
+            
+        # 第一种重排序的方法
+        # results = retriever.get_relevant_documents()
         # 打印结果
-        i =1
-        for result in results:
-            print(i,"根据问题检索到相关信息如下")
-            print(result.page_content)
-            i=i+1
+        # i =1
+        # for result in results:
+        #     print(i,"根据问题检索到相关信息如下")
+        #     print(result.page_content)
+        #     i=i+1
+            
+    
+        # qa_chain = (
+        #         {"context": retriever | format_docs, "question": RunnablePassthrough()}
+        #         | rag_prompt
+        #         | model
+        #         | StrOutputParser()
+        # )
         qa_chain = (
-                {"context": retriever_from_llm | format_docs, "question": RunnablePassthrough()}
+                {"context": compression_retriever | format_docs, "question": RunnablePassthrough()}
                 | rag_prompt
                 | model
                 | StrOutputParser()
@@ -186,9 +234,18 @@ def receive_message(request):
             if not vectorstore:
                 return JsonResponse({'success': False, 'error': '向量存储初始化失败'}, status=500)
             
-            qa_chain = build_qa_chain(vectorstore, QA_MODEL)
+            qa_chain = build_qa_chain(vectorstore, QA_MODEL,question)
             
             answer = qa_chain.invoke(question)
+            
+
+            '''
+            compressed_docs = compression_retriever.invoke(
+                "我要做细菌框架图（1G）,大概要多少钱？"
+            )
+            '''
+            
+            
             print(answer)
             clean_answer = remove_think(answer)
             log_qa(question, answer)

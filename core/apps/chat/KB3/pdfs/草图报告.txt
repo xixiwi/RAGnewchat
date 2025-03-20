@@ -1,0 +1,467 @@
+
+基因组项目
+基因组草图分析报告
+合同编号：
+样本编号：A1
+分       析：允思拓生物
+日       期：2024年10月15日
+1 分析概览
+基因组变异进化是新型细菌病原体不断出现的重要原因之一，细菌可以通过获得或丢失一些基因及基因突变来获得新的特性 和适应性，比如毒力增强或耐药性增强等，从而导致新Chemicalbook流行亚型的出现，为临床诊断治疗、传染病监测防控 带来极大挑战。细菌基因组测序可以有效整合利用细菌的基因组信息，在研究细菌重要特性和变异进化方面有很高的分辨率。
+
+随着经济全球化的发展，全球各地区之间的联系越来越紧密，跨地区人流、物流、生物迁徙等愈发广泛，新型细菌和新发 传染病流行扩散的可能性也越来越大，抗生素耐药细菌的传播扩散成为全球关注的公共卫生紧急事件，威胁着各级卫生保 健服务的医疗干预手段。Chemicalbook基于基因组测序的细菌变异进化研究分辨率高、分析结果快速，能为应对这些挑 战提供坚实的支撑，并且已经在多次医院内感染调查、传染病疫情调查和防控中大显身手。基于细菌基因组测序的分型方 法对于多耐药细菌的暴发检测和进化变异检测具有重要意义和帮助。
+
+细菌基因组测序按照拼接后基因组完整性，可以分为草图，精细图和完成图。每种类型对应的测序方法，测序深度又各为不同。
+
+草图（draft genome）：也就框架图，一般使用的是二代Illumina测序技术，测50X数据量，进行序列组装，来获取基因 组的基本信息。草图测序性价比高，可满足细菌基因组研究基本需求。一般要求基因组覆盖度达到95%以上，基因区覆盖度 98%以上 ，单碱基错误率在十万分之一。
+
+细菌基因组测序最早的方案是只用 sanger 测序，例如人类基因组计划。后来有了 454 高通量测序，只是用454 测序进行拼接， 但价格比较贵。后来有了价格便宜的 illumina 测序技术，但因为读长较短，只能采用不同大片段文库，以及 sanger 补洞的方案。以上这些方案目前已经不具备优势，被逐步淘汰。
+
+目前市场上还没有“完美”的测序方案，可以将基因组从头测到尾，因此，必须进行基因组的拼接工作。目前可以选择的 测序方案有一代 sanger 测序，二代 illumina 以及 MGI，三代 pacbio以及 nanopore 测序。这几种测序方法 各有优缺点。一代测序价格贵，不能进行高通量测序。
+
+该报告结果包含了样品菌株从原始数据到注释分析的全部内容，除了基本的组装和基因预测，基因功能注释外， 我们还进行了抗生素耐药，是否携带质粒，MLST类型等分析。所有分析项都有一个具体的工作表格或者图片对应 详细结果。
+
+2 项目流程
+2.1 实验流程
+从收到样品到最终数据获得，样品检测、建库、测序每一个环节都会对数据质量和数量产生影响， 而数据质量又会直接影响后续信息分析的结果。为了保证测序数据的准确性、可靠性，我们对 样品收样品、保存、建库、测序每一个生产步骤都严格把控，确保了高质量数据的产出。
+
+
+图2.1 基因组草图文库构建流程
+
+文库质控合格后，把不同文库按照有效浓度及目标下机数据量的需求pooling后进行Illumina HiSeq测序。
+
+2.2 生物信息分析流程
+第一：原始下机序列文件（raw data）的质量控制，过滤低质量序列，质控包括：
+
+去掉reads的接头序列；
+截掉reads两端测序不准确的碱基，直接截取左端5个碱基，右端5个碱基；
+去除当中还含有N的reads；
+当一条reads中超过20%的碱基质量分数小于20，则舍弃该reads所对应的一对reads。
+第二：基于质控后序列文件（clean data）进行，通过如下流程进行生物信息学分析：
+
+
+图2.2 基因组草图项目分析流程
+
+3 分析结果
+3.1 数据质控
+结果目录：01_QC/
+利用fastqc和multiqc生成测序质量报告，点击打开
+
+利用fastp对原始数据进行过滤，然后对原始数据（Raw data）及过滤后数据（Clean data）进行质量统计。
+
+质控步骤如下：
+
+去除 reads 中的 adaptor 序列
+去除测序质量较低的 reads(质量值小于 20)
+去除含 N 较多的 reads
+去除经过以上步骤后长度小于 40nt 的序列
+表3.1 原始数据质控统计
+Sample	InsertSize(bp)	RawData(M)	CleanData(M)	Clean_Q20	Clean_Q30	Clean_GC(%)	Effective(%)
+A1	350	788.83	724.671	98.62	95.67	53.81	91.87
+利用组装结果序列作为参考，用bwa将Clean Reads比对到参考序列上，获得碱基深度，以1000bp为窗口，在序列上逐碱基前进，计算每个窗口的平均深度与GC含量，做GC-depth图，跟据散点是否集中可以判断样本是否混入杂菌。
+
+
+图3.1 GC-depth图
+
+3.2 基因组组装和基因预测
+结果目录：02_Assembly/
+3.2.1 基因组组装
+表3.2.1 基因组草图组装结果
+Sample	Genome Size(bp)	Contig Number	Average Length	Longest Length	N50	N90	GC(%)
+A1	4913217	178	27602.3	234942	72061	12716	51.09
+基于高通量测序的细菌生物信息学分析步骤都依赖于序列拼接的结果，序列拼接这个步骤是处于整个数据分析中核心地位的。 前期从样品提取，建库、测序等等做了大量工作，就是为了序列拼接这个步骤得到一个好的拼接结果。而在得到了拼接结果 之后。就可以进行结构基因组学、功能基因组学以及比较基因组学的分析了。
+
+序列拼接我们也常常说成 denovo 序列拼接。denovo 是从头开始的意思。也就是不要基于原有的序列来拼接。将一大堆 测序的短 reads 输入给拼接软件，就能够得到了一个物种的全基因组序列了。这个操作并不难，但是软件需要经过大量 数据处理过程，序列拼接是一项非常复杂的工作。这是一项非常复杂的工作，需要非常大的计算。基因组拼接就是要利用denovo 的拼接方法。
+
+我们使用Abyss-pe软件，对测得的PE数据进行组装，组装后选择最佳组装结果，并过滤序列长队少于1000bp的短序列。
+
+
+图3.2.1.1 基因组A1的GC质控图
+
+
+图3.2.1.2 基因组A1的Contig长度分布图
+
+3.2.2 基因预测
+基因预测一般指预测 DNA 序列中编码蛋白质的部分。其方法主要有两大类：一类是基于相似性的预测方法，即利用已知的 mRNA 或蛋白质序列为线索在 DNA 序列中搜寻所对应的片段，达到基因预测的目的；另一类是基于统计学模型的从头预测方法，这种方法可不依赖已知的 DNA序列进行，即利用统计学模型训练出相应参数，再对基因进行预测。
+
+我们采用 PGAP(v5.0) 软件来对各样本的组装结果进行基因预测。PGAP 全称 NCBI Prokaryotic Genome Annotation Pipeline， 是NCBI开发的一套用于原核生物基因预测的流程。
+
+表3.2.2 基因预测结果统计表
+Gene	CDS	tRNA	rRNA	tmRNA	miscRNA
+Number	4843	4528	82	5	1	227
+
+
+图3.2.2 基因组A1的CDS长度分布
+
+3.2.3 组装结果质量评估
+利用CheckM软件(v1.2.2)对组装结果进行评估，结果如下表：
+
+表3.2.3 基因预测结果统计表
+Sample	Marker lineage	markers	marker sets	Completeness	Contamination	Strain heterogeneity
+A1	Escherichia coli (6)	1628	307	99.24	0.59	44.44
+3.2.4 MLST类型
+多位点序列分型（multilocus sequence typing, MLST）是一种运用于细菌系统发育分类学的分子技术，是指利用若干个位点（通常是7-10个）的核苷酸序列来识别细菌的特定类型。这些位点一般是细菌基因组中的核酸序列，如DNA多聚体、染色体或质粒。通过MLST分型技术可以根据细菌的多态性（即在某些位点上可能出现不同的碱基排序）来鉴定细菌株，将细菌株分类到特定的种、类别和属，从而更好地控制 病原微生物的传播和管理。
+
+使用软件 mlstfinder(v2.23.0) 对 A1 的基因组进行MLST分型，结果为 ecoli_achtman_4 - 1196 。
+
+表3.2.4 MLST分型的Locus结果
+Locus 1	Locus 2	Locus 3	Locus 4	Locus 5	Locus 6	Locus 7
+adk(6)	fumC(6)	gyrB(33)	icd(26)	mdh(11)	purA(8)	recA(2)
+3.2.5 质粒复制子预测
+质粒复制子是在质粒DNA中能进行自主复制并维持正常拷贝数的一段最小的DNA序列, 可以在细菌细胞中独立复制。它们包含有用于复制和表达质粒上的基因的必要信息。它可以复制和修复DNA分子，保护和维持DNA的稳定性。质粒复制子能够复制DNA，维护DNA的结构，帮助避免DNA损伤，使复制的DNA与原始DNA一致，保护DNA免受外界的破坏。
+
+本研究使用 plasmidfinder(v2.1) 分析基因组数据的质粒携带情况，样品A1发现的相关质粒复制子信息如下表：
+
+表3.2.5 质粒复制子预测结果表
+Contig	Start	End	Identity	Overlap	Plasmid
+seq_20	2533	1852	98.39	100.0	IncFIB(AP001918)
+seq_151	1009	749	98.08	100.38	IncFII(pHN7A8)
+3.2.6 假基因预测
+假基因也叫伪基因，他是基因家族在进化过程中形成的无功能的残留物。它与正常基因相似，但丧失正常功能的DNA序列。假基因可视为基因组中与编码基因序列非常相似的非功能性基因组 DNA 拷贝，一般情况都不被转录，且没有明确生理意义。 根据其来源可分为保留了间隔序列的复制假基因和缺少间隔序列的已加工假基因。
+
+本研究使用 pseudofinder(v2.1) 预测假基因，样品A1共发现180个假基因。
+
+
+
+图3.2.6 基因组A1的假基因存在情况
+
+3.3 结构注释
+结果目录：03_Element
+3.3.1 antismash(次级代谢簇)预测
+antiSMASH（antibiotics & Secondary Metabolite Analysis Shell）是一个用于识别和分析微生物中生物合成基因簇（BGCs）的工具。BGCs是一组编码生物合成途径的基因，这些途径用于合成生物活性化合物，如抗生素、抗肿瘤药物等。通过分析BGCs，可以帮助研究者发现新的生物活性化合物，并了解这些化合物的生物合成途径。
+
+antiSMASH 使用基于规则的方法来识别 SM 生产中涉及的许多不同类型的生物合成途径。对编码非核糖体肽合成酶（non-ribosomal peptide synthetases，NRPS）、I型和II型聚酮合酶（polyketide synthases，PKS）、羊毛肽（lanthipeptides）、套索肽（sactipeptides）、活性肽（sactipeptides）和硫肽（thiopeptides）的BGC进行更深入的分析，针对这些簇特异性分析可以提供更多信息有关所执行的生物合成步骤的信息，从而还可以提供对所产生的化合物的更详细的预测。
+
+进入 antismash 目录解压 A1.zip 后点击 index.html 查看结果。
+
+
+
+图3.3.1 antismash 结果示意图
+
+3.3.2 CRISPR簇预测
+人体有着一套复杂且高效的免疫系统，时刻保护着我们免受病毒和细菌的攻击。但是，对于弱小又无助的原核细胞而言，它们也是急切需要被保护的。为此，经过几亿年的进化，细菌和大部分古细菌衍生出了CRISPR-Cas系统，用于保护它们免受外源DNA和噬菌体的侵染。
+
+当细菌受到噬菌体的侵染时，被释放到细菌细胞质中的噬菌体基因组的某段DNA序列被识别并整合到CRISPR的spacer区域，随后转录出相应的crRNA前体（pre-crRNA）。crRNA前体经过修饰和加工，生成向导RNA（guide-RNA）。由于gRNA中存在一段来源于噬菌体基因组的序列，因此gRNA可以通过碱基的互补配对原则识别噬菌体的基因组。同时存在于细胞质中的gRNA和Cas蛋白特异性结合，并靶向到噬菌体基因组参与DNA的切割与降解。
+
+CRISPR簇是一个广泛存在于细菌和古生菌基因组中的特殊DNA重复序列家族，充当了防御外源遗传物质的“基因武器”。CRISPR全称Clustered Regularly Interspersed Short Palindromic Repeats—成簇的规律间隔的短回文重复序列，分布在40%的已测序细菌和90%的已测序古细菌当中。CRISPR序列由众多短而保守的重复序列区（repeats）和间隔区（spacer）组成。重复序列区含有回文序列，可以形成发卡结构。而间隔区比较特殊，它们是被细菌俘获的外源DNA序列。这就相当于细菌免疫系统的“黑名单”，当这些外源遗传物质再次入侵时，CRISPR/Cas系统就会予以精确打击。而在上游的前导区（leader）被认为是CRISPR序列的启动子。另外，在上游还有一个多态性的家族基因，该基因编码的蛋白均可与CRISPR序列区域共同发生作用。因此，该基因被命名为CRISPR关联基因（CRISPR associated，Cas）。目前已经发现了Cas1-Cas10等多种类型的Cas基因。Cas基因与CRISPR序列共同进化，形成了在细菌中高度保守的CRISPR/Cas系统。
+
+
+图3.3.2 CRISPR位点示意图
+
+我们使用CRISPRFinder、CRISPRCasFinder和CRISPRCasTyper对基因组进行CRISPR预测和分型。结果显示在基因组中共预测到2个CRISPR arrays。
+
+3.3.3 插入序列预测
+插入序列是相对较短的紧凑的 DNA 片段（0.7 到 2.5 kb 之间），它们只编码与移动性有关的功能，是 MGE 的一大类群。
+
+许多插入序列末端携带短的（< 40bp）不完全反向重复序列，并在插入点的两侧通常存在一个 2 - 14bp 的短 DNA 复制。
+
+利用软件 ISEScan(v1.7.2.3) 进行插入序列预测。结果如下表：
+
+表3.3.3 插入序列预测结果统计表
+Contig	family	nIS	%Genome	bps4IS	dnaLen
+gnl|Prokka|A1_100	IS256	1	14.31	1077	7527
+gnl|Prokka|A1_100	IS6	1	3.81	287	7527
+gnl|Prokka|A1_100	IS91	1	10.48	789	7527
+gnl|Prokka|A1_103	IS3	1	71.29	2796	3922
+gnl|Prokka|A1_104	IS3	1	2.73	1443	52880
+gnl|Prokka|A1_106	IS3	1	62.32	1391	2232
+gnl|Prokka|A1_108	IS5	1	6.47	1057	16345
+gnl|Prokka|A1_111	IS3	1	10.07	1443	14336
+gnl|Prokka|A1_113	IS110	1	37.43	1756	4692
+gnl|Prokka|A1_115	ISAS1	1	2.44	1662	68072
+gnl|Prokka|A1_120	IS110	1	2.53	1219	48149
+gnl|Prokka|A1_121	IS110	1	3.13	1486	47514
+gnl|Prokka|A1_125	IS5	1	30.64	1057	3450
+gnl|Prokka|A1_125	IS6	1	17.97	620	3450
+gnl|Prokka|A1_135	ISAS1	1	11.71	1612	13762
+gnl|Prokka|A1_137	IS3	1	37.72	799	2118
+gnl|Prokka|A1_138	IS200/IS605	1	3.51	1660	47323
+gnl|Prokka|A1_143	IS3	1	58.19	6435	11059
+gnl|Prokka|A1_146	IS3	1	29.77	1095	3678
+gnl|Prokka|A1_146	IS66	1	61.99	2280	3678
+gnl|Prokka|A1_147	IS6	2	23.86	706	2959
+gnl|Prokka|A1_148	IS1	1	9.78	765	7820
+gnl|Prokka|A1_148	IS3	1	12.98	1015	7820
+gnl|Prokka|A1_149	IS3	1	3.47	1311	37796
+gnl|Prokka|A1_149	ISAS1	1	3.12	1181	37796
+gnl|Prokka|A1_15	IS3	2	2.28	1411	61970
+gnl|Prokka|A1_151	IS21	1	10.94	473	4322
+gnl|Prokka|A1_154	new	2	49.5	3382	6833
+gnl|Prokka|A1_155	IS3	1	1.98	1443	72702
+gnl|Prokka|A1_156	IS3	1	5.2	1443	27770
+gnl|Prokka|A1_158	ISNCY	1	1.17	1353	115743
+gnl|Prokka|A1_160	IS110	1	0.84	1110	131993
+gnl|Prokka|A1_160	ISNCY	1	1.31	1732	131993
+gnl|Prokka|A1_167	IS110	1	26.52	1179	4446
+gnl|Prokka|A1_173	IS3	1	12.19	1310	10750
+gnl|Prokka|A1_175	IS200/IS605	2	0.79	1429	181948
+gnl|Prokka|A1_176	IS200/IS605	1	11.96	1660	13881
+gnl|Prokka|A1_178	IS110	1	15.95	1256	7873
+gnl|Prokka|A1_178	IS21	1	21.53	1695	7873
+gnl|Prokka|A1_178	IS3	1	10.52	828	7873
+gnl|Prokka|A1_178	ISL3	1	22.46	1768	7873
+gnl|Prokka|A1_20	IS21	1	13.22	590	4462
+gnl|Prokka|A1_54	IS21	1	0.89	971	108493
+gnl|Prokka|A1_54	ISNCY	1	1.06	1154	108493
+gnl|Prokka|A1_64	ISAS1	1	46.55	1181	2537
+gnl|Prokka|A1_65	IS5	1	46.95	1162	2475
+gnl|Prokka|A1_66	IS110	1	8.83	1851	20969
+gnl|Prokka|A1_66	IS200/IS605	1	2.19	459	20969
+gnl|Prokka|A1_67	IS110	1	1.83	1110	60529
+gnl|Prokka|A1_68	IS110	1	12.13	1110	9151
+gnl|Prokka|A1_69	IS110	1	1.0	1491	148858
+gnl|Prokka|A1_7	IS4	1	5.26	1144	21734
+gnl|Prokka|A1_70	IS110	1	2.68	1278	47673
+gnl|Prokka|A1_71	IS110	1	1.92	1110	57885
+gnl|Prokka|A1_72	IS110	1	21.23	1110	5228
+gnl|Prokka|A1_74	IS1380	1	12.68	572	4511
+gnl|Prokka|A1_74	IS6	1	6.36	287	4511
+gnl|Prokka|A1_79	IS21	1	1.49	2121	142176
+gnl|Prokka|A1_84	ISNCY	2	2.26	2508	110821
+gnl|Prokka|A1_88	IS4	1	18.43	1464	7945
+gnl|Prokka|A1_91	IS1	1	2.25	80	3561
+gnl|Prokka|A1_92	IS1	1	1.28	80	6241
+gnl|Prokka|A1_94	IS3	1	10.62	1131	10651
+gnl|Prokka|A1_96	IS200/IS605	2	1.82	1537	84439
+gnl|Prokka|A1_99	IS91	2	62.7	3152	5027
+3.3.4 基因岛预测
+基因组岛是细菌或古细菌基因组中位置相邻的外源基因集群，通常与 tRNA 基因整合在一起，通常编码病原体的毒力因子如抗菌素耐药性基因，编码与环境适应性相关的新基因如金属抗性基因，以及毒物代谢基因如芳烃降解基因等。
+
+利用软件 islandpath(v1.0.6) 进行基因岛预测。
+
+样品A1未找到基因岛序列。
+
+3.3.5 噬菌体序列预测
+溶源噬菌体是将自身的基因整合到宿主细菌基因组中，并作为宿主细菌基因组的一部分进行复制。这些可移动的元素可以对它们的细菌宿主的基因组和表型产生巨大的影响，这可能增加菌株的多样性，增加毒性或抗生素抗性。
+
+PhiSpy(v4.2.21)是一个在细菌（或者古菌）基因组中识别溶源噬菌体的工具。输入一个经过注释的基因组，它会识别出中最可能是噬菌体的区域。PhiSpy的原理是识别出溶源噬菌体的几个显著特征，包括：蛋白质长度，转录链的方向，AT、CG的偏斜性（skew），噬菌体特异words的丰度，噬菌体的插入位点和噬菌体蛋白的相似性。
+
+表3.3.5 噬菌体序列预测结果统计表
+ID	Contig	Start	End
+3.3.6 重复序列预测
+细菌的重复元件可能参与了某些重要功能。
+
+RepeatMasker(v4.1.4)是重复序列检测的常用工具，通过与参考数据库的相似性比对来准确识别或屏蔽基因组中的重复序列，属于同源预测注释的方式。
+
+3.4 通用数据库注释
+结果目录：04_Annotation
+表3.4 通用数据库注释基因数量统计表
+DBname	Number
+COG	4367
+GO	3112
+KEGG	3355
+NR	4517
+UNIPROT	4507
+
+图3.4 通用数据库注释基因数量韦恩图
+
+3.4.1 NR数据库
+NR数据库，全称为Non-Redundant Protein Sequence Database(非冗余蛋白序列数据库)，其构建目的在于通过整合各个常用的基因库中的数据，来去除其中重复的序列信息。这样可以有效减少重复数据所带来的干扰，从而更好地展示出基因序列数据的真实意义。NR数据库收集的数据具有广泛性和可靠性，并且不断更新，使得其可以满足各个领域的科学家对于生命科学领域的需求
+
+3.4.2 Uniprot数据库
+Uniprot （Universal Protein ）是包含蛋白质序列，功能信息，研究论文索引的蛋白质数据库，整合了包括EBI（ European Bioinformatics Institute），SIB（the Swiss Institute of Bioinformatics），PIR（Protein Information Resource）三大数据库的资源。
+
+EBI（ European Bioinformatics Institute）：欧洲生物信息学研究所（EMBL-EBI）是欧洲生命科学旗舰实验室EMBL的一部分。位于英国剑桥欣克斯顿的惠康基因组校园内，是世界上基因组学领域最强的地带之一。
+EBI（ European Bioinformatics Institute）：欧洲生物信息学研究所（EMBL-EBI）是欧洲生命科学旗舰实验室EMBL的一部分。位于英国剑桥欣克斯顿的惠康基因组校园内，是世界上基因组学领域最强的地带之一。
+PIR（Protein Information Resource）：PIR由美国国家生物医学研究基金会（NBRF）于1984年成立，旨在协助研究人员识别和解释蛋白质序列信息。
+UniProt 数据库由两个子库 Swiss-Prot 和 TrEMBL 构成。
+
+3.4.3 GO数据库
+GO(Gene Ontology) 是基因本体论联合会建立的数据库，标准化不同数据库中的关于基因和基因产物的生物学术语，对基因和蛋白功能进行限定和描述。利用 GO 数据库，可以按照基因参与的生物学过程(Biological process)、构成细胞的组分(Cellular component)、实现的分子功能(Molecular function)等进行分类。通过获得的GO注释信息，可以将基因进行功能分类或者细胞定位。
+
+GO 的基本单元是Term，每个 term 有一个唯一的标示符（由"GO:"加上 7 个数字组成，例如 GO:0072669）；每类 Ontology的Term通过它们之间的联系（is_a, part_of, regulate）构成一个有向无环的拓扑结构。详见 http://www.geneontology.org/ 。
+
+
+图3.4.3 GO二级分类图
+
+3.4.4 KEGG数据库
+KEGG(Kyoto Encyclopedia of Genes and Genomes，京都基因和基因组百科全书)是基因组破译方面的公共数据库。该数据库是系统分析基因功能、联系基因组信息和功能信息的大型知识库，其中的基因组信息主要是从NCBI等数据库中获得的，包括完整和部分测序的基因组序列，存储于KEGG GENES数据库中。更高级的功能信息包括图形化的细胞过程如代谢、膜转运、信号传递、细胞周期等，还包括同系保守的子通路等信息，存储于KEGG PATHWAY数据库中。
+
+此外，关于化学物质、酶分子、酶化反应等相关的信息存储于KEGG LIGAND数据库中。在生物体内，基因产物并不是孤立存在地作用的，不同基因产物之间通过有序的相互协调来行使其具体的生物学功能。因此，KEGG数据库中丰富的通路信息将有助于我们从系统水平去了解基因的生物学功能，例如代谢途径、遗传信息传递以及细胞过程等一些复杂的生物功能，这大大提高了该数据库在实际生产和应用中的价值。
+
+
+图3.4.4 KEGG统计图
+
+3.4.5 COG数据库
+COG(Clusters of Orthologous Groups of proteins)是对同源蛋白质进行分类的数据库。它是在对已完成基因组测序的物种的蛋白质序列进行相互比较的基础上构建的，COG数据库选取的物种包括各个主要的系统进化谱系。每个COG家族至少由来自3个系统进化谱系的物种的蛋白所组成，所以一个COG对应于一个古老的保守结构域。构成每个COG的蛋白被假定来自于同一个祖先蛋白。进行COG数据库比对可以对预测蛋白进行功能注释、归类以及蛋白进化分析。
+
+COG数据库将已知的原核基因按照参与的不同功能，将基因分为几十个功能类别。通过已经得到的COG注释信息，可以将基因组的基因按照数据库的分类信息进行功能分类。样品的基因组蛋白进行COG功能归类后的统计结果如下图：
+
+
+图3.4.5 COG分类图
+
+不同颜色的COG功能如下图所示：
+
+A: Acyl-CoA Synthesis
+B: Biosynthesis
+C: Catabolism
+D: Degradation
+E: Energy Production
+F: Folding
+G: Glycan Metabolism
+H: Hydrolase Activity
+I: Ion Transport
+J: Joining/Assembly
+K: Kinase Activity
+L: Lipid Metabolism
+M: Metabolism
+N: Nucleotide Metabolism
+O: Oxidation-Reduction
+P: Protein Synthesis
+Q: Quorum Sensing
+R: Regulation
+S: Signal Transduction
+T: Transport
+U: Unknown Function
+V: Virulence Factor
+3.4.6 Pfam数据库
+Pfam是一个被广泛使用的蛋白家族结构域数据库，其依赖于多序列比对和隐马尔可夫模型（HMMs）鉴定一个或多个蛋白质功能结构域。
+
+Pfam数据库包含两个版本。
+
+Pfam-A：Pfam-A来自基础序列数据库Pfamseq，是根据最新的UniProtKB数据建立的。为高质量，手工确定的蛋白结构域数据。
+Pfam-B为基于Pfam-A数据库自动注释得到的蛋白结构域数据库。
+此分析采用 Pfam-A(v37.0) 数据库，利用软件 hmmscan(v3.4) 进行分析。
+
+3.4.7 TIGRfam数据库
+最初的TIGRFAMs数据库是基因组研究所（TIGR）及其继任者 J.Craig Venter Institute（JCVI）的一个研究项目。TIGRFAMs 是手动校验的蛋白质家族的集合，主要关注原核序列。它由隐马尔可夫模型 （HMM）、多个序列比对等对 TIGRFAM 和其他数据库中相关模型的交叉引用组成。
+
+TIGRFAMS数据库于2018年4月移交给NCBI，该中心现在持有该数据的知识共享许可，并负责维护和分发该知识产权。该数据库被用于NCBI的GenBank和RefSeq序列注释的原核基因组注释。TIGRFAM 可在 Entrez 中搜索，并可作为更大的 HMM 集合的一部分下载。该集合的其他组成部分是 NCBIFAM 和源自精选蛋白质簇 （PRK） 集合的模型。
+
+3.5 特殊数据库注释
+结果目录：05_SpecielDB
+3.5.1 CARD数据库
+随着抗生素药物的发现及使用，越来越多的耐药菌株由此产生。而耐药菌株的发展则会增加疾病治疗的难度和成本，因此耐药微生物的研究则显得尤为重要。目前，通过对耐药基因的鉴定挖掘能够一定程度上帮助我们揭开耐药机制，为疾病的治疗、药物研发提供参考。ARDB是最先整合了各种微生物中抗药基因的数据库，但它从2009年开始就不再更新。而CARD(the Comprehensive Antibiotic Research Database)数据库包含了ARDB数据库中所有抗性信息，并搭建了一个基于志愿者贡献的数据共享平台，做到了实时更新保证了数据的有效性。目前，CARD数据库收集了超过1600个已知的抗生素抗性基因。
+
+CARD数据库(http://arpcard.mcmaster.ca)核心是ARO(Antibiotic Resistance Ontology), ARO包含了与抗生素抗性基因，抗性机制，抗生素和靶相关的term
+
+利用软件 RGI(v6.0.3) 进行 CARD 数据库注释
+
+3.5.2 CAZy数据库
+CAZy 全称为 Carbohydrate-Active enZYmes Database，碳水化合物酶相关的专业数据库，内容包括能催化碳水化合物降解、修饰、以及生物合成的相关酶系家族。其包含五个主要分类：糖苷水解酶（Glycoside Hydrolases, GHs）、糖基转移酶（GlycosylTransferases, GTs）、多糖裂解酶（Polysaccharide Lyases, PLs）和糖类酯解酶（Carbohydrate Esterases, CEs）、氧化还原酶（Auxiliary Activities, AAs）。此外，还包含与碳水化合物结合结构域（Carbohydrate-Binding Modules，CBMs）。
+
+碳水化合物活性酶具有降解、修饰及生成糖苷键的功能，常常具有多结构域的特点，除了其催化作用的催化结构域外，还包含有功能各异的其它结构域，碳水化合物结合结构域（Carbohydrate-Binding Module, CBM）就属于这些附属结构域的一种。碳水化合物结合结构域是一种非催化结构域，能折叠成特定的三维空间结构，具有结合碳水化合物的功能。近年来研究表明：碳水化合物结合结构域能通过结合碳水化合物活性酶的底物，高碳水化合物活性酶的催化结构域作用于底物的活性。
+
+
+图3.5.2 CAZy分类统计图
+
+Glycoside Hydrolases (GHs) : hydrolysis and/or rearrangement of glycosidic bonds (see CAZypedia definition)
+
+GlycosylTransferases (GTs) : formation of glycosidic bonds (see definition)
+
+Polysaccharide Lyases (PLs) : non-hydrolytic cleavage of glycosidic bonds
+
+Carbohydrate Esterases (CEs) : hydrolysis of carbohydrate esters
+
+Auxiliary Activities (AAs) : redox enzymes that act in conjunction with CAZymes.
+
+Carbohydrate-Binding Modules (CBMs) : adhesion to carbohydrates
+
+3.5.3 CYPED数据库
+细胞色素P450（cytochromeP450或CYP450），为一类亚铁血红素—硫醇盐蛋白的超家族，它参与内源性物质和包括药物、环境化合物在内的外源性物质的代谢。在真菌中，次级代谢产物的合成和外来化合物的代谢有着重要作用，许多化合物的生物转化是由CYP450介导的，在实际应用上，CYP450在农药降解中也起着重要作用。
+
+数据库中有收录细菌、真菌等的细胞色素P450，一共收录274个物种的32245个CYP450。
+
+3.5.4 PHI数据库
+PHI-base（Pathogen Host Interactions），病原宿主互作数据库，是一个免费开放的数据库，收录了经过实验验证或文献报道的能够感染植物、动物、真菌和昆虫的真菌、卵菌、细菌等病原菌的致病基因、毒力基因和效应蛋白基因。另外，数据库还收录了抗真菌化合物及其靶基因。
+
+3.5.5 SignalP数据库
+信号肽（signal peptides）：是引导新和成的蛋白质向分泌通路转移的短肽链，长度约5-30个氨基酸；对应的mRNA序列，在起始密码子后，有一段编码疏水性氨基酸序列的RNA区域，该氨基酸序列即为信号肽序列，它负责吧蛋白质引导到细胞含不同膜结构的亚细胞器内。
+
+分泌蛋白中有许多是生命活动所需的重要酶类。分泌蛋白的 N 端是由 15～30 个氨基酸组成的信号肽，对分泌蛋白的分泌起主导作用。使用信号肽预测工具 SignalP，采用神经网络和隐马氏模型的方法预测蛋白序列是否是分泌蛋白。
+
+表3.5.5 分泌蛋白结果统计
+总分泌蛋白数目	总蛋白种类数	分泌蛋白占总比(%)
+575	4528	12.7
+
+图3.5.5 SignalP预测结果示意图
+
+C-score (raw cleavage site score)：用来区分是否为剪切位点，最高峰值为剪切位点后的第一个氨基酸(即成熟蛋白的第一个氨基酸残基)；
+S-score (signal peptide score)：用来区分相应位置是否为信号肽区域；
+Y-score (combined cleavage site score)：C-score和S-score的几何平均数，用于避免多个高分C-score值对结果的影响。
+3.5.6 T3SS数据库
+三型分泌系统（Type 3 secretion system，T3SS）作为存在于革兰氏阴性菌中的分泌系统之一，对革兰氏阴性菌的致病有重要作用。T3SS的致病作用体现在T3SS能直接将效应蛋白转运至宿主细胞，进而通过效应蛋白调控细胞的一系列通路，促进细菌定殖于细胞。而效应蛋白的转运受到两方面因素的调控，一方面是效应蛋白本身的信号序列，另一方面是T3SS相关蛋白的辅助。
+
+利用软件 effectiveT3(v3.0) 对蛋白序列进行 T3SS 注释，结果见下表：
+
+表3.5.6 T3SS注释统计表
+sample	total number	effective true	effective false
+A1	4528	415	4113
+3.5.7 TCDB数据库
+TCDB是对膜转运蛋白（Membrane Transport Protein）进行分类的一个数据库，它制定了一套转运蛋白分类系统（Transporter Classification）, 简称TC System, 类似于对酶进行分类的EC系统，只不过TC系统同时提供了功能和进化信息。
+
+3.5.8 跨膜结构预测
+生物膜所含的蛋白叫膜蛋白，是生物膜功能的主要承担者。生物体大约30%蛋白质都是膜蛋白，而膜蛋白是药物的主要靶标。
+
+许多膜蛋白是兼性分子，它们的多肽链可以横穿膜一次或者是多次，以疏水区跨越双层的疏水区与脂肪酸链共价结合，而亲水的极性部分位于膜的内外表面。
+
+跨膜蛋白（transmembrane protein，TP)是一种贯穿生物膜(细胞膜)两端的蛋白。许多跨膜蛋白的功能是作为通道或“装载码头”来实施拒绝或允许某种特定的物质跨过生物膜的运输、进入细胞，同时，也使要废弃的副产品运出细胞。
+
+TMHMM(v2.0c)是由Anders Krogh和ErikSonnhammer开发的一种基于隐马尔可夫模型（hidden Markov model）预测跨膜螺旋的工具。
+
+
+图3.5.8 跨膜结构预测结果示意图
+
+3.5.9 VFDB数据库
+毒力基因检测是一种通过检测个体的基因表达或基因变异来评估其潜在的毒性或药物反应性的方法。 这种测试可以帮助医生确定个体对某些药物的敏感性，并帮助预测可能的不良反应。
+
+毒力基因检测通常涉及对特定基因或基因组区域进行检测，这些基因可能影响药物的代谢、药物靶标的敏感性或药物的清除。 通过分析这些基因的变异或表达水平，医生可以获得关于一个人如何处理某些药物的信息。
+
+预测得到的毒力基因如图：
+
+
+图3.5.9 预测得到的毒力基因热图
+
+4 帮助文档
+结果文件建议使用Excel或者EditPlus等专业文本编辑器打开。
+
+文件后缀名	文件描述	打开方式
+*.tar.gz, *.tar, *.gz, *.zip	压缩文件	使用解压缩软件如WinRAR、7-Zip等
+*.fa, *.fq, *.fasta, *.pep, *.fna. *.txt, *.gff	序列文件或纯文本文件	使用高级文本编辑器Editplus/Notepad++等查看
+*.png, *,pdf, *.jpg	图片文件	一般双击就可以打开
+*,csv, *.tsv, *.xls	表格文件	使用高级文本编辑器Editplus/Notepad++ 等，大部分也可以用Excel打开
+文件名 
+00_Report/
+01_QC/
+02_Assembly/
+03_Element/
+04_Annotation/
+05_SpecielDB/
+文件描述 
+报告文件夹
+数据质控文件夹
+组装和基因预测结果
+结构注释目录
+通用数据库注释结果目录
+特殊数据注释结果目录
+
+
+请双击目录名称可查看下一级目录。
+
+有些文件若不存在，则是该项无结果导致。
+
+5 参考文献
+Carattoli, A., Zankari, E., García-Fernández, A., Voldby Larsen, M., Lund, O., Villa, L., Møller Aarestrup, F., & Hasman, H. (2014). In silico detection and typing of plasmids using PlasmidFinder and plasmid multilocus sequence typing. Antimicrobial agents and chemotherapy, 58(7), 3895–3903.
+Wenger A M , Peluso P , Rowell W J , et al. Accurate circular consensus long-read sequencing improves variant detection and assembly of a human genome[J]. Nature Biotechnology, 2019, 37(11).
+PacBio.In precisionFDA Challenge,PacBio HiFi Reads Outperform Both Short Reads and Noisy Long Reads.https://www.pacb.com/blog/precisionfda-challenge/[EB/OL].2020.08.11
+Maiden MC et al. (1998). Multilocus sequence typing: a portable approach to the identification of clones within populations of pathogenic microorganisms. Proc Natl Acad Sci USA, 95:3140-3145.
+Cock P J A, Fields C J, Goto N, et al. (2010). The Sanger FASTQ file format for sequences with quality scores, and the Solexa/Illumina FASTQ variants. Nucleic acids research 38, 1767-1771. (FASTQ)
+Young M D, Wakefield M J, Smyth G K, et al. (2010).Gene ontology analysis for RNA-seq: accounting for selection bias. Genome Biology, doi:10.1186/gb-2010-11-2-r14. (GOseq)
+Kanehisa M, Araki M, Goto S, et al. (2008). KEGG for linking genomes to life and the environment. Nucleic Acids research 36:D480-D484. (KEGG)
+Carlos P Cantalapiedra, Ana Hernández-Plaza, Ivica Letunic, Peer Bork, Jaime Huerta-Cepas, eggNOG-mapper v2: Functional Annotation, Orthology Assignments, and Domain Prediction at the Metagenomic Scale, Molecular Biology and Evolution, Volume 38, Issue 12, December 2021, Pages 5825–5829
+Mina Rho, Haixu Tang, and Yuzhen Ye. FragGeneScan: Predicting Genes in Short and Error-prone Reads. Nucl. Acids Res., 2010
+6 联系我们
+尊敬的客户，感谢您选择允思拓(天津)生物科技有限公司的科技服务项目， 非常感谢您的信赖和支持。在承诺高标准交付指标的同时将进一步大幅压缩 项目服务周期，为合作伙伴提供完善的基因测序分析服务。我们真诚的希望 得到您的宝贵意见和建议，以便我们更好地完善我们的服务。如有任何需求 或意见，请联系相关联系人
+
+Dear customers, We greatly appreciate you choosing Uniteomic's service, and sincerely look forward to receiving your valuable comments and suggestions so that we can better improve our service. Please call us at anytime if you have aservice question.
+
+允思拓(天津)生物科技有限公司
+
+022-68512878
+
+目录
+1 分析概览
+2 项目流程
+3 分析结果
+4 帮助文档
+5 参考文献
+6 联系我们
